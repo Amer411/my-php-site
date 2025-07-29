@@ -219,24 +219,21 @@ $visits = $stats['project_visits'][$projectId] ?? 0;
         }
 
         .project-image-container {
-            margin: 20px 0;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            max-height: 400px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f0f0f0;
-        }
-
-        .project-image {
             width: 100%;
             height: auto;
-            max-height: 400px;
+            max-height: 500px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f5f5f5;
+        }
+            
+        .project-image {
+            max-width: 100%;
+            max-height: 100%;
             object-fit: contain;
         }
-
         .project-description {
             background: white;
             padding: 25px;

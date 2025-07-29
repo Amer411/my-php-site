@@ -53,7 +53,7 @@ if (!$project) {
 $baseUrl = 'https://my-php-site-hma1.onrender.com';
 $currentUrl = $baseUrl . '/project-details.php?id=' . urlencode($projectId);
 $projectTitle = htmlspecialchars($project['name'] ?? 'مشروع التاجرة');
-$description = htmlspecialchars(mb_substr(strip_tags($project['description'] ?? 'وصف مشروع التاجرة'), 0, 160);
+$description = htmlspecialchars(mb_substr(strip_tags($project['description'] ?? 'وصف مشروع التاجرة'), 0, 160));
 
 // معالجة رابط الصورة
 $imageUrl = $baseUrl . '/mnsah.jpg'; // صورة افتراضية

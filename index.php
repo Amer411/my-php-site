@@ -71,23 +71,21 @@ if (file_exists($projectsFile)) {
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://menhage.kesug.com" />
+    <meta property="og:url" content="https://my-php-site-hma1.onrender.com/" />
     <meta property="og:title" content="مشاريع التاجرات اليمنيات" />
     <meta property="og:description" content="منصة لدعم وتمكين التاجرات اليمنيات لعرض مشاريعهن التجارية" />
-    <meta property="og:image" itemprop="image" content="mnsah.jpg" />
-    <meta property="og:image:type" content="image/jpg" />
+    <meta property="og:image" itemprop="image" content="https://my-php-site-hma1.onrender.com/mnsah.jpg" />
+    <meta property="og:image:type" content="jpg" />
     <meta property="og:image:width" content="256" />
     <meta property="og:image:height" content="256" />
-    <link rel="image_src" href="https://menhage.kesug.com/mnsah.jpg">
+    <link rel="image_src" href="https://my-php-site-hma1.onrender.com/mnsah.jpg">
     <!-- Twitter -->
     <meta property="twitter:card" content="summary" />
-    <meta property="twitter:url" content="https://menhage.kesug.com/" />
+    <meta property="twitter:url" content="https://my-php-site-hma1.onrender.com/" />
     <meta property="twitter:title" content="مشاريع التاجرات اليمنيات" />
     <meta property="twitter:description" content="منصة لدعم وتمكين التاجرات اليمنيات لعرض مشاريعهن التجارية" />
-    <meta property="twitter:image" content="//menhage.kesug.com/mnsah.jpg" />
-    <a href="https://wa.me/?text=مرحباً، اكتشفوا منصة مشاريع التاجرات اليمنيات: https://menhage.kesug.com" target="_blank" style="background: #25D366; color: white; padding: 10px 15px; border-radius: 5px; text-decoration: none;">
-    شارك على واتساب <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="20" style="vertical-align: middle;">
-    </a>
+    <meta property="twitter:image" content="https://my-php-site-hma1.onrender.com/mnsah.jpg" />
+    
     <!-- Favicon -->
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 

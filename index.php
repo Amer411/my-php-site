@@ -74,17 +74,17 @@ if (file_exists($projectsFile)) {
     <meta property="og:url" content="https://my-php-site-hma1.onrender.com/" />
     <meta property="og:title" content="مشاريع التاجرات اليمنيات" />
     <meta property="og:description" content="منصة لدعم وتمكين التاجرات اليمنيات لعرض مشاريعهن التجارية" />
-    <meta property="og:image" itemprop="image" content="https://my-php-site-hma1.onrender.com/mnsah.png" />
+    <meta property="og:image" itemprop="image" content="https://my-php-site-hma1.onrender.com/mnsah.jpg" />
     <meta property="og:image:type" content="png" />
     <meta property="og:image:width" content="256" />
     <meta property="og:image:height" content="256" />
-    <link rel="image_src" href="https://my-php-site-hma1.onrender.com/mnsah.png">
+    <link rel="image_src" href="https://my-php-site-hma1.onrender.com/mnsah.jpg">
     <!-- Twitter -->
     <meta property="twitter:card" content="summary" />
     <meta property="twitter:url" content="https://my-php-site-hma1.onrender.com/" />
     <meta property="twitter:title" content="مشاريع التاجرات اليمنيات" />
     <meta property="twitter:description" content="منصة لدعم وتمكين التاجرات اليمنيات لعرض مشاريعهن التجارية" />
-    <meta property="twitter:image" content="https://my-php-site-hma1.onrender.com/mnsah.png" />
+    <meta property="twitter:image" content="https://my-php-site-hma1.onrender.com/mnsah.jpg" />
     
     <!-- Favicon -->
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">

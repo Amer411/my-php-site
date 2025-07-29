@@ -50,15 +50,19 @@ if (!$project) {
 }
 
 // إعداد بيانات المشاركة
-$baseUrl = 'https://menhage.kesug.com';
+$baseUrl = 'https://my-php-site-hma1.onrender.com';
 $currentUrl = $baseUrl . '/project-details.php?id=' . urlencode($projectId);
 $projectTitle = htmlspecialchars($project['name'] ?? 'مشروع التاجرة');
-$description = htmlspecialchars(mb_substr(strip_tags($project['description'] ?? 'وصف مشروع التاجرة'), 0, 160));
+$description = htmlspecialchars(mb_substr(strip_tags($project['description'] ?? 'وصف مشروع التاجرة'), 0, 160);
 
 // معالجة رابط الصورة
-$imageUrl = $baseUrl . '/images/default-share.jpg';
+$imageUrl = $baseUrl . '/mnsah.jpg'; // صورة افتراضية
 if (!empty($project['images'][0]['permanent_url'])) {
-    $imageUrl = htmlspecialchars($project['images'][0]['permanent_url']);
+    $imageUrl = $project['images'][0]['permanent_url'];
+    // إذا كان الرابط نسبيًا، أضف عنوان الموقع الأساسي
+    if (strpos($imageUrl, 'http') !== 0) {
+        $imageUrl = $baseUrl . '/' . ltrim($imageUrl, '/');
+    }
 }
 
 // إحصائيات المشروع
@@ -83,16 +87,16 @@ $visits = $stats['project_visits'][$projectId] ?? 0;
     <meta property="og:url" content="<?= $currentUrl ?>">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="منصة مشاريع التاجرات">
-    <meta property="og:image:width" content="300">
-    <meta property="og:image:height" content="300">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:image:type" content="image/jpeg">
     <meta property="og:updated_time" content="<?= time() ?>">
 
-    <!-- schema.org thumbnail enhancement -->
-    <link itemprop="thumbnailUrl" href="<?= $imageUrl ?>">
-    <span itemprop="thumbnail" itemscope itemtype="http://schema.org/ImageObject">
-        <link itemprop="url" href="<?= $imageUrl ?>">
-    </span>
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?= $projectTitle ?>">
+    <meta name="twitter:description" content="<?= $description ?>">
+    <meta name="twitter:image" content="<?= $imageUrl ?>">
 
     <!-- Favicon -->
     <link rel="icon" href="<?= $baseUrl ?>/favicon.ico">
@@ -223,6 +227,7 @@ $visits = $stats['project_visits'][$projectId] ?? 0;
             display: flex;
             align-items: center;
             justify-content: center;
+            background: #f0f0f0;
         }
 
         .project-image {
@@ -239,6 +244,7 @@ $visits = $stats['project_visits'][$projectId] ?? 0;
             margin: 25px 0;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             white-space: pre-line;
+            line-height: 1.8;
         }
 
         .social-links {
@@ -274,6 +280,7 @@ $visits = $stats['project_visits'][$projectId] ?? 0;
             gap: 15px;
             margin: 30px 0;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         .like-btn {
@@ -345,6 +352,26 @@ $visits = $stats['project_visits'][$projectId] ?? 0;
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
 
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .gallery-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .gallery-image:hover {
+            transform: scale(1.05);
+        }
+
         @media (max-width: 600px) {
             .project-title {
                 font-size: 1.6rem;
@@ -401,7 +428,7 @@ $visits = $stats['project_visits'][$projectId] ?? 0;
 
         <?php if(!empty($project['images'][0]['permanent_url'])): ?>
             <div class="project-image-container">
-                <img src="<?= $imageUrl ?>" class="project-image" alt="<?= $projectTitle ?>" loading="lazy">
+                <img src="<?= htmlspecialchars($imageUrl) ?>" class="project-image" alt="<?= $projectTitle ?>" loading="lazy">
             </div>
         <?php endif; ?>
     </div>
@@ -409,6 +436,20 @@ $visits = $stats['project_visits'][$projectId] ?? 0;
     <div class="project-description">
         <?= nl2br(htmlspecialchars($project['description'] ?? 'لا يوجد وصف متاح')) ?>
     </div>
+
+    <?php if(!empty($project['images']) && count($project['images']) > 1): ?>
+        <div class="image-gallery">
+            <?php foreach($project['images'] as $image): ?>
+                <?php 
+                $imgUrl = $image['permanent_url'];
+                if (strpos($imgUrl, 'http') !== 0) {
+                    $imgUrl = $baseUrl . '/' . ltrim($imgUrl, '/');
+                }
+                ?>
+                <img src="<?= htmlspecialchars($imgUrl) ?>" class="gallery-image" alt="<?= $projectTitle ?>" loading="lazy">
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
 
     <div class="social-links">
         <?php if(!empty($project['whatsapp'])): ?>
@@ -536,6 +577,19 @@ $visits = $stats['project_visits'][$projectId] ?? 0;
                 });
             }
         }
+
+        // معاينة الصور عند النقر عليها
+        document.querySelectorAll('.gallery-image').forEach(img => {
+            img.addEventListener('click', function() {
+                Swal.fire({
+                    imageUrl: this.src,
+                    imageAlt: '<?= $projectTitle ?>',
+                    showConfirmButton: false,
+                    background: 'transparent',
+                    backdrop: 'rgba(0,0,0,0.8)'
+                });
+            });
+        });
     </script>
 </body>
 </html>

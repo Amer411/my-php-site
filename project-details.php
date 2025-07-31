@@ -1,12 +1,11 @@
 <?php
+// بدء الجلسة في بداية الملف
+session_start();
+
 // تعطيل التخزين المؤقت بالكامل
 header("Cache-Control: no-cache, no-store, must-revalidate");
 header("Pragma: no-cache");
 header("Expires: 0");
-
-// تمكين عرض الأخطاء للتصحيح
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
 // معالجة بيانات المشروع
 $projectId = $_GET['id'] ?? '';
@@ -26,9 +25,17 @@ if (!file_exists($statsFile)) {
 // قراءة إحصائيات الموقع
 $stats = json_decode(file_get_contents($statsFile), true) ?: [];
 
-// تحديث عدد زيارات المشروع
-$stats['project_visits'][$projectId] = ($stats['project_visits'][$projectId] ?? 0) + 1;
-file_put_contents($statsFile, json_encode($stats));
+// تهيئة مصفوفة المشاريع المزورة في الجلسة إذا لم تكن موجودة
+if (!isset($_SESSION['visited_projects'])) {
+    $_SESSION['visited_projects'] = [];
+}
+
+// تحديث عدد زيارات المشروع فقط إذا لم يتم زيارة الصفحة في هذه الجلسة
+if (!isset($_SESSION['visited_projects'][$projectId])) {
+    $stats['project_visits'][$projectId] = ($stats['project_visits'][$projectId] ?? 0) + 1;
+    file_put_contents($statsFile, json_encode($stats));
+    $_SESSION['visited_projects'][$projectId] = true;
+}
 
 // معالجة طلب الإعجاب
 if (isset($_GET['like'])) {
@@ -431,12 +438,6 @@ $visits = $stats['project_visits'][$projectId] ?? 0;
         </div>
 
         <?php if(!empty($project['images'][0]['permanent_url'])): ?>
-            <?php 
-            $mainImageUrl = $project['images'][0]['permanent_url'];
-            if (strpos($mainImageUrl, 'http') !== 0) {
-                $mainImageUrl = $baseUrl . '/' . ltrim($mainImageUrl, '/');
-            }
-            ?>
             <div class="project-image-container">
                 <img src="<?= htmlspecialchars($mainImageUrl) ?>" class="project-image" alt="<?= $projectTitle ?>" loading="lazy">
             </div>

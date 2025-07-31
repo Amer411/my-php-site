@@ -4,6 +4,10 @@ header("Cache-Control: no-cache, no-store, must-revalidate");
 header("Pragma: no-cache");
 header("Expires: 0");
 
+// تمكين عرض الأخطاء للتصحيح
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 // معالجة بيانات المشروع
 $projectId = $_GET['id'] ?? '';
 $projectsFile = __DIR__ . '/projects.json';
@@ -50,18 +54,18 @@ if (!$project) {
 }
 
 // إعداد بيانات المشاركة
-$baseUrl = 'https://my-php-site-hma1.onrender.com';
+$baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
 $currentUrl = $baseUrl . '/project-details.php?id=' . urlencode($projectId);
 $projectTitle = htmlspecialchars($project['name'] ?? 'مشروع التاجرة');
 $description = htmlspecialchars(mb_substr(strip_tags($project['description'] ?? 'وصف مشروع التاجرة'), 0, 160));
 
-// معالجة رابط الصورة
-$imageUrl = $baseUrl . '/mnsah.jpg'; // صورة افتراضية
+// معالجة رابط الصورة الرئيسية
+$mainImageUrl = $baseUrl . '/mnsah.jpg'; // صورة افتراضية
 if (!empty($project['images'][0]['permanent_url'])) {
-    $imageUrl = $project['images'][0]['permanent_url'];
+    $mainImageUrl = $project['images'][0]['permanent_url'];
     // إذا كان الرابط نسبيًا، أضف عنوان الموقع الأساسي
-    if (strpos($imageUrl, 'http') !== 0) {
-        $imageUrl = $baseUrl . '/' . ltrim($imageUrl, '/');
+    if (strpos($mainImageUrl, 'http') !== 0) {
+        $mainImageUrl = $baseUrl . '/' . ltrim($mainImageUrl, '/');
     }
 }
 
@@ -82,8 +86,8 @@ $visits = $stats['project_visits'][$projectId] ?? 0;
     <!-- Open Graph (WhatsApp / Facebook Preview) -->
     <meta property="og:title" content="<?= $projectTitle ?>">
     <meta property="og:description" content="<?= $description ?>">
-    <meta property="og:image" content="<?= $imageUrl ?>">
-    <meta property="og:image:secure_url" content="<?= $imageUrl ?>">
+    <meta property="og:image" content="<?= $mainImageUrl ?>">
+    <meta property="og:image:secure_url" content="<?= $mainImageUrl ?>">
     <meta property="og:url" content="<?= $currentUrl ?>">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="منصة مشاريع التاجرات">
@@ -96,7 +100,7 @@ $visits = $stats['project_visits'][$projectId] ?? 0;
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="<?= $projectTitle ?>">
     <meta name="twitter:description" content="<?= $description ?>">
-    <meta name="twitter:image" content="<?= $imageUrl ?>">
+    <meta name="twitter:image" content="<?= $mainImageUrl ?>">
 
     <!-- Favicon -->
     <link rel="icon" href="<?= $baseUrl ?>/favicon.ico">
@@ -219,21 +223,24 @@ $visits = $stats['project_visits'][$projectId] ?? 0;
         }
 
         .project-image-container {
+            margin: 20px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            max-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0f0f0;
+        }
+
+        .project-image {
             width: 100%;
             height: auto;
-            max-height: 500px;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #f5f5f5;
-        }
-            
-        .project-image {
-            max-width: 100%;
-            max-height: 100%;
+            max-height: 400px;
             object-fit: contain;
         }
+
         .project-description {
             background: white;
             padding: 25px;
@@ -424,8 +431,14 @@ $visits = $stats['project_visits'][$projectId] ?? 0;
         </div>
 
         <?php if(!empty($project['images'][0]['permanent_url'])): ?>
+            <?php 
+            $mainImageUrl = $project['images'][0]['permanent_url'];
+            if (strpos($mainImageUrl, 'http') !== 0) {
+                $mainImageUrl = $baseUrl . '/' . ltrim($mainImageUrl, '/');
+            }
+            ?>
             <div class="project-image-container">
-                <img src="<?= htmlspecialchars($imageUrl) ?>" class="project-image" alt="<?= $projectTitle ?>" loading="lazy">
+                <img src="<?= htmlspecialchars($mainImageUrl) ?>" class="project-image" alt="<?= $projectTitle ?>" loading="lazy">
             </div>
         <?php endif; ?>
     </div>
@@ -436,14 +449,16 @@ $visits = $stats['project_visits'][$projectId] ?? 0;
 
     <?php if(!empty($project['images']) && count($project['images']) > 1): ?>
         <div class="image-gallery">
-            <?php foreach($project['images'] as $image): ?>
-                <?php 
-                $imgUrl = $image['permanent_url'];
-                if (strpos($imgUrl, 'http') !== 0) {
-                    $imgUrl = $baseUrl . '/' . ltrim($imgUrl, '/');
-                }
-                ?>
-                <img src="<?= htmlspecialchars($imgUrl) ?>" class="gallery-image" alt="<?= $projectTitle ?>" loading="lazy">
+            <?php foreach($project['images'] as $index => $image): ?>
+                <?php if($index > 0): ?>
+                    <?php 
+                    $imgUrl = $image['permanent_url'];
+                    if (strpos($imgUrl, 'http') !== 0) {
+                        $imgUrl = $baseUrl . '/' . ltrim($imgUrl, '/');
+                    }
+                    ?>
+                    <img src="<?= htmlspecialchars($imgUrl) ?>" class="gallery-image" alt="<?= $projectTitle ?>" loading="lazy">
+                <?php endif; ?>
             <?php endforeach; ?>
         </div>
     <?php endif; ?>

@@ -112,6 +112,19 @@ $visits = $stats['project_visits'][$projectId] ?? 0;
     <title><?= $projectTitle ?> | منصة مشاريع التاجرات</title>
     <meta name="description" content="<?= $description ?>">
 
+    <!-- PWA Meta Tags -->
+    <meta name="application-name" content="مشاريع التاجرات اليمنيات">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="تاجرات يمنيات">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="msapplication-TileColor" content="#6a11cb">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="theme-color" content="#6a11cb">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+
     <!-- Open Graph (WhatsApp / Facebook Preview) -->
     <meta property="og:title" content="<?= $projectTitle ?>">
     <meta property="og:description" content="<?= $description ?>">
@@ -613,6 +626,16 @@ $visits = $stats['project_visits'][$projectId] ?? 0;
             transform: scale(1.05);
         }
 
+        /* رسالة عدم الاتصال */
+        .offline-message {
+            display: none;
+            background: #fff8e6;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            text-align: center;
+        }
+
         @media (max-width: 600px) {
             .project-title {
                 font-size: 1.6rem;
@@ -651,6 +674,11 @@ $visits = $stats['project_visits'][$projectId] ?? 0;
     </style>
 </head>
 <body>
+    <!-- رسالة عدم الاتصال -->
+    <div id="offline-message" class="offline-message">
+        <i class="fas fa-wifi"></i> أنت غير متصل بالإنترنت، بعض المعلومات قد لا تكون حديثة.
+    </div>
+
     <div class="project-header">
         <?php if($isFeatured): ?>
             <div class="featured-badge">
@@ -806,6 +834,91 @@ $visits = $stats['project_visits'][$projectId] ?? 0;
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // تسجيل Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('Service Worker مسجل بنجاح:', registration.scope);
+                        
+                        // تحديث المحتوى عند توفر إصدار جديد
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    Swal.fire({
+                                        title: 'يتوفر تحديث جديد!',
+                                        text: 'يوجد نسخة جديدة من التطبيق، هل تريد تحديثه الآن؟',
+                                        icon: 'info',
+                                        showCancelButton: true,
+                                        confirmButtonText: 'تحديث',
+                                        cancelButtonText: 'لاحقاً'
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            window.location.reload();
+                                        }
+                                    });
+                                }
+                            });
+                        });
+                    })
+                    .catch(err => {
+                        console.log('فشل تسجيل Service Worker:', err);
+                    });
+            });
+        }
+
+        // عرض زر التثبيت
+        let deferredPrompt;
+        const installBtn = document.createElement('button');
+        installBtn.innerHTML = '<i class="fas fa-download"></i> تثبيت التطبيق';
+        installBtn.className = 'btn';
+        installBtn.style.display = 'none';
+        installBtn.style.margin = '10px auto';
+        document.querySelector('.project-header').appendChild(installBtn);
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'block';
+            
+            installBtn.addEventListener('click', () => {
+                installBtn.style.display = 'none';
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        Swal.fire('تم التثبيت!', 'تم تثبيت التطبيق بنجاح على جهازك.', 'success');
+                    }
+                    deferredPrompt = null;
+                });
+            });
+        });
+
+        window.addEventListener('appinstalled', () => {
+            installBtn.style.display = 'none';
+            console.log('تم تثبيت PWA');
+        });
+
+        // الكشف عن حالة الاتصال
+        function updateOnlineStatus() {
+            const offlineMessage = document.getElementById('offline-message');
+            if (!navigator.onLine) {
+                offlineMessage.style.display = 'block';
+                Swal.fire({
+                    title: 'أنت غير متصل!',
+                    text: 'بعض الوظائف قد لا تعمل بسبب عدم وجود اتصال بالإنترنت',
+                    icon: 'warning',
+                    timer: 3000
+                });
+            } else {
+                offlineMessage.style.display = 'none';
+            }
+        }
+
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        updateOnlineStatus();
+
         // Slider functionality
         document.addEventListener('DOMContentLoaded', function() {
             const slider = document.getElementById('slider');

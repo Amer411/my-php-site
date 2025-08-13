@@ -128,6 +128,9 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             --handmade: #6bcebb;
             --fashion: #a78bfa;
             --other: #94a3b8;
+            --edit: #17a2b8;
+            --whatsapp: #25D366;
+            --instagram: #E1306C;
         }
         
         * {
@@ -369,6 +372,15 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             background: #c82333;
         }
         
+        .btn-edit {
+            background: var(--edit);
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background: #138496;
+        }
+        
         .project-image {
             width: 60px;
             height: 60px;
@@ -417,6 +429,96 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             color: var(--other);
         }
         
+        /* أنماط جديدة للروابط الاجتماعية */
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .social-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+        
+        .social-link.whatsapp {
+            background: rgba(37, 211, 102, 0.2);
+            color: var(--whatsapp);
+        }
+        
+        .social-link.whatsapp:hover {
+            background: rgba(37, 211, 102, 0.3);
+        }
+        
+        .social-link.instagram {
+            background: rgba(225, 48, 108, 0.2);
+            color: var(--instagram);
+        }
+        
+        .social-link.instagram:hover {
+            background: rgba(225, 48, 108, 0.3);
+        }
+        
+        /* أنماط إدارة الصور */
+        .project-images-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .image-actions {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+        
+        .image-actions img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        
+        .image-options {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            border-radius: 5px;
+        }
+        
+        .image-actions:hover .image-options {
+            display: flex;
+        }
+        
+        .replace-btn, .delete-image-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        
+        .replace-btn i, .delete-image-btn i {
+            font-size: 0.8rem;
+        }
+        
         @media (max-width: 768px) {
             .projects-table {
                 display: block;
@@ -425,6 +527,16 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             
             .action-buttons {
                 flex-direction: column;
+            }
+            
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            .social-link {
+                padding: 0.3rem;
+                font-size: 0.7rem;
             }
         }
     </style>
@@ -517,23 +629,64 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                                         ?>
                                     </span>
                                 </td>
-                                <td>
+                                <td class="social-links">
                                     <?php if(!empty($project['whatsapp'])): ?>
-                                        <div><i class="fab fa-whatsapp" style="color: var(--success);"></i> <?= htmlspecialchars($project['whatsapp']) ?></div>
+                                        <?php 
+                                        $whatsapp = $project['whatsapp'];
+                                        $whatsappNumber = preg_replace('/[^0-9]/', '', $whatsapp);
+                                        if (!str_starts_with($whatsappNumber, '967') && strlen($whatsappNumber) > 0) {
+                                            $whatsappNumber = '967' . ltrim($whatsappNumber, '0');
+                                        }
+                                        $whatsappLink = 'https://wa.me/' . $whatsappNumber;
+                                        ?>
+                                        <a href="<?= $whatsappLink ?>" target="_blank" class="social-link whatsapp">
+                                            <i class="fab fa-whatsapp"></i> واتساب
+                                        </a>
                                     <?php endif; ?>
+                                    
                                     <?php if(!empty($project['instagram'])): ?>
-                                        <div><i class="fab fa-instagram" style="color: var(--instagram);"></i> <?= htmlspecialchars($project['instagram']) ?></div>
+                                        <?php
+                                        $instagram = $project['instagram'];
+                                        $instagramUsername = ltrim($instagram, '@');
+                                        $instagramLink = 'https://instagram.com/' . $instagramUsername;
+                                        ?>
+                                        <a href="<?= $instagramLink ?>" target="_blank" class="social-link instagram">
+                                            <i class="fab fa-instagram"></i> إنستجرام
+                                        </a>
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <?php foreach($project['images'] as $image): ?>
-                                        <?php if(!empty($image['permanent_url'])): ?>
-                                            <img src="<?= $image['permanent_url'] ?>" class="project-image" alt="صورة المشروع">
-                                        <?php endif; ?>
-                                    <?php endforeach; ?>
+                                    <div class="project-images-container">
+                                        <?php foreach($project['images'] as $index => $image): ?>
+                                            <?php if(!empty($image['permanent_url'])): ?>
+                                                <div class="image-actions">
+                                                    <img src="<?= $image['permanent_url'] ?>" alt="صورة المشروع">
+                                                    <div class="image-options">
+                                                        <label class="replace-btn">
+                                                            <i class="fas fa-exchange-alt"></i> استبدال
+                                                            <input type="file" 
+                                                                   class="replace-image-input" 
+                                                                   data-project-id="<?= $project['id'] ?>"
+                                                                   data-image-index="<?= $index ?>"
+                                                                   style="display: none;"
+                                                                   accept="image/*">
+                                                        </label>
+                                                        <button class="delete-image-btn"
+                                                                data-project-id="<?= $project['id'] ?>"
+                                                                data-image-index="<?= $index ?>">
+                                                            <i class="fas fa-trash"></i> حذف
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    </div>
                                 </td>
                                 <td>
                                     <div class="action-buttons">
+                                        <a href="edit-project.php?id=<?= $project['id'] ?>" class="btn btn-edit">
+                                            <i class="fas fa-edit"></i> تعديل
+                                        </a>
                                         <form method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا المشروع؟')">
                                             <input type="hidden" name="project_id" value="<?= $project['id'] ?>">
                                             <input type="hidden" name="action" value="delete">
@@ -644,12 +797,30 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                                         ?>
                                     </span>
                                 </td>
-                                <td>
+                                <td class="social-links">
                                     <?php if(!empty($project['whatsapp'])): ?>
-                                        <div><i class="fab fa-whatsapp" style="color: var(--success);"></i> <?= htmlspecialchars($project['whatsapp']) ?></div>
+                                        <?php 
+                                        $whatsapp = $project['whatsapp'];
+                                        $whatsappNumber = preg_replace('/[^0-9]/', '', $whatsapp);
+                                        if (!str_starts_with($whatsappNumber, '967') && strlen($whatsappNumber) > 0) {
+                                            $whatsappNumber = '967' . ltrim($whatsappNumber, '0');
+                                        }
+                                        $whatsappLink = 'https://wa.me/' . $whatsappNumber;
+                                        ?>
+                                        <a href="<?= $whatsappLink ?>" target="_blank" class="social-link whatsapp">
+                                        <i class="fab fa-whatsapp"></i> <?= $whatsappNumber ?>
+                                        </a>
                                     <?php endif; ?>
+                                    
                                     <?php if(!empty($project['instagram'])): ?>
-                                        <div><i class="fab fa-instagram" style="color: var(--instagram);"></i> <?= htmlspecialchars($project['instagram']) ?></div>
+                                        <?php
+                                        $instagram = $project['instagram'];
+                                        $instagramUsername = ltrim($instagram, '@');
+                                        $instagramLink = 'https://instagram.com/' . $instagramUsername;
+                                        ?>
+                                        <a href="<?= $instagramLink ?>" target="_blank" class="social-link instagram">
+                                        <i class="fab fa-instagram"></i> <?= $instagramUsername ?>
+                                        </a>
                                     <?php endif; ?>
                                 </td>
                                 <td>
@@ -712,6 +883,91 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         });
     }
+
+    // حذف الصورة
+    document.querySelectorAll('.delete-image-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const projectId = this.dataset.projectId;
+            const imageIndex = this.dataset.imageIndex;
+            
+            Swal.fire({
+                title: 'هل أنت متأكد؟',
+                text: 'سيتم حذف هذه الصورة بشكل دائم',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'نعم، احذف',
+                cancelButtonText: 'إلغاء'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('admin-actions.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `action=delete_image&project_id=${projectId}&image_index=${imageIndex}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.success) {
+                            Swal.fire('تم الحذف!', 'تم حذف الصورة بنجاح.', 'success').then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire('خطأ!', data.message || 'حدث خطأ أثناء الحذف', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire('خطأ!', 'حدث خطأ في الاتصال بالخادم', 'error');
+                    });
+                }
+            });
+        });
+    });
+
+    // استبدال الصورة
+    document.querySelectorAll('.replace-image-input').forEach(input => {
+        input.addEventListener('change', function() {
+            const projectId = this.dataset.projectId;
+            const imageIndex = this.dataset.imageIndex;
+            const file = this.files[0];
+            
+            if (!file) return;
+            
+            const formData = new FormData();
+            formData.append('action', 'replace_image');
+            formData.append('project_id', projectId);
+            formData.append('image_index', imageIndex);
+            formData.append('image', file);
+            
+            Swal.fire({
+                title: 'جاري استبدال الصورة...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            fetch('admin-actions.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    Swal.fire('تم الاستبدال!', 'تم تحديث الصورة بنجاح.', 'success').then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire('خطأ!', data.message || 'حدث خطأ أثناء الاستبدال', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire('خطأ!', 'حدث خطأ في الاتصال بالخادم', 'error');
+            });
+        });
+    });
     </script>
 </body>
 </html>
